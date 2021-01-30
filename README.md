@@ -7,6 +7,7 @@ All steps below are specifically for Linux distro Ubuntu 20.04 LTS
 - Python 3.8
 - Pip 20.2.4
 - OpenCV
+- PyAutoGUI 0.9.52
 
 ### Setup
 https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
@@ -44,5 +45,16 @@ Leaving the virtual env
 ```sh
 $ pip install opencv-contrib-python
 ```
+
+### Install PyAutoGUI
+```sh
+$ pip install PyAutoGUI
+```
+You might need to install tkinter to use MouseInfo
+```sh
+$ apt-get install python3-tk python3-dev
+```
+
+
 
 
