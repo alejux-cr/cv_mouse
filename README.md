@@ -1,4 +1,4 @@
-# Headmouse - Computer Vision application to control the mouse by tracking face/head movement
+# CVMouse - Computer Vision application to control the mouse by tracking face/head/object movement
 
 ## Computer Vision - ENV set up on Ubuntu 20.04 Focal Fossa
 All steps below are specifically for Linux distro Ubuntu 20.04 LTS
@@ -6,7 +6,7 @@ All steps below are specifically for Linux distro Ubuntu 20.04 LTS
 ## System requirements
 - Python 3.8
 - Pip 20.2.4
-- OpenCV
+- OpenCV 4.5.1
 - PyAutoGUI 0.9.52
 
 ### Setup
