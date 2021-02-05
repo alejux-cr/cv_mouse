@@ -3,6 +3,7 @@ import numpy as np
 from collections import deque
 from background_extraction import BackgroundExtraction
 from background_contour import BackgroundContour
+from feature_matcher import FeatureMatcher
 
 def main():
 
@@ -18,6 +19,7 @@ def main():
 
     bg_buffer = BackgroundExtraction(width, height, scale, maxlen=5)
     contour_extractor = BackgroundContour()
+    matcher = FeatureMatcher()
 
     while True:
         # Reading, resizing, and flipping the frame
@@ -31,10 +33,20 @@ def main():
         # Process contours
         external_contour, internal_contours = contour_extractor.apply(frame)
 
-        cv.imshow("External contours", external_contour)
-        cv.imshow("Internal contours", internal_contours)
+        #cv.imshow("External contours", external_contour)
+        #cv.imshow("Internal contours", internal_contours)
+
+        # Match the set cursor in the frame with different methods
+        # bf_matches = matcher.brute_force_orb_match(frame)
+        # cv.imshow("BF ORB Matches", bf_matches)
+
+        #sift_matches = matcher.brute_force_sift_match(frame)
+        #cv.imshow("BF SIFT Matches", sift_matches)
         
-        cv.imshow("FG Mask", fg_mask)
+        flann_matches = matcher.flann_match(frame)
+        cv.imshow("FLANN Matches", flann_matches)
+
+        #cv.imshow("FG Mask", fg_mask)
         cv.imshow("Headmouse", frame)
 
         key = cv.waitKey(1)
@@ -42,8 +54,8 @@ def main():
             cap.release()
             break
         elif key == ord('s'): # Same image of desired cursor (ex. something simple)
-            cv.imwrite(filename='saved_img.jpg', img=frame)
-            img_new = cv.imread('saved_img.jpg', cv.IMREAD_GRAYSCALE)
+            cv.imwrite(filename='cursor.jpg', img=frame)
+            img_new = cv.imread('cursor.jpg', cv.IMREAD_GRAYSCALE)
             img_new = cv.imshow("Captured Image", img_new)
 
 
