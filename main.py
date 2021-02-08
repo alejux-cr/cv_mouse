@@ -4,6 +4,8 @@ from collections import deque
 from background_extraction import BackgroundExtraction
 from background_contour import BackgroundContour
 from feature_matcher import FeatureMatcher
+from detector import ObjectDetector
+from tracker import Tracker
 
 def main():
 
@@ -20,6 +22,11 @@ def main():
     bg_buffer = BackgroundExtraction(width, height, scale, maxlen=5)
     contour_extractor = BackgroundContour()
     matcher = FeatureMatcher()
+    detector = ObjectDetector()
+
+    # Read frame here too for tracker init ONLY 
+    _, frame = cap.read()
+    tracker = Tracker(frame)
 
     while True:
         # Reading, resizing, and flipping the frame
@@ -43,10 +50,16 @@ def main():
         #sift_matches = matcher.brute_force_sift_match(frame)
         #cv.imshow("BF SIFT Matches", sift_matches)
         
-        flann_matches = matcher.flann_match(frame)
-        cv.imshow("FLANN Matches", flann_matches)
+        #flann_matches = matcher.flann_match(frame)
+        # cv.imshow("FLANN Matches", flann_matches)
 
+        #detector.detect(frame)
         #cv.imshow("FG Mask", fg_mask)
+
+        #img = tracker.lucas_kanade_track(frame)
+        #cv.imshow("Lucas-Kanade tracker", img)
+        img = tracker.gunner_farneback_track(frame)
+        cv.imshow("Gunner-Farneback tracker", img)
         cv.imshow("Headmouse", frame)
 
         key = cv.waitKey(1)
