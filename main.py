@@ -27,15 +27,19 @@ def main():
     # Read frame here too for tracker init ONLY 
     _, frame = cap.read()
 
+    frame = cv.flip(frame, 1)
     tracker = Tracker(frame)
+
+    # for api tracker only:
+    api_tracker = tracker.api_tracker_create(4, frame)
 
     while True:
         # Reading, resizing, and flipping the frame
-        ret , frame = cap.read()
+        ret, frame = cap.read()
 
         if ret == True:
             # frame = cv.resize(frame, (width, height))
-            # frame = cv.flip(frame, 1)
+            frame = cv.flip(frame, 1)
 
             # Processing the frame
             # fg_mask = bg_buffer.apply(frame)
@@ -64,8 +68,13 @@ def main():
             #img = tracker.gunner_farneback_track(frame)
             #cv.imshow("Gunner-Farneback tracker", img)
 
-            img = tracker.cam_shift_track(frame)
-            cv.imshow("Face tracker", img)
+            # CamShift
+            #img = tracker.cam_shift_track(frame)
+            #cv.imshow("Face tracker", img)
+
+            # API Tracker
+            tracker.api_tracker_update(frame)
+            
             cv.imshow("Headmouse", frame)
 
             key = cv.waitKey(1)

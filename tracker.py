@@ -17,6 +17,10 @@ class Tracker:
 
         self.face_cascade = cv.CascadeClassifier('haarcascades/haarcascade_frontalface_default.xml')
 
+        # For api tracker only
+        self.roi = cv.selectROI(frame, False)
+        self.api_tracker = None
+
     def lucas_kanade_track(self, frame):
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         mask = np.zeros_like(frame)
@@ -90,5 +94,32 @@ class Tracker:
             img2 = frame
 
         return img2
+
+    def api_tracker_create(self, type, frame):
+        types = {
+            1: cv.legacy.TrackerBoosting_create(),
+            2: cv.TrackerMIL_create(),
+            3: cv.TrackerKCF_create(),
+            4: cv.legacy.TrackerTLD_create(),
+            5: cv.legacy.TrackerMedianFlow_create()
+        }
+        self.api_tracker = types.get(type, "Invalid API Tracker")
+        ret = self.api_tracker.init(frame, self.roi)      
+
+    def api_tracker_update(self, frame):
+        
+        success, self.roi = self.api_tracker.update(frame)
+        
+        # roi var is a tuple of 4 floats
+        # we need each value as integers
+        (x,y,w,h) = tuple(map(int,self.roi))
+
+        if success:
+            p1 = (x, y)
+            p2 = (x+w, y+h)
+            cv.rectangle(frame, p1, p2, (0,255,0), 3)
+        else:
+            cv.putText(frame, "Fail to detect tracking", (100,200), cv.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 3)
+
 
         
