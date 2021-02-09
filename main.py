@@ -26,51 +26,58 @@ def main():
 
     # Read frame here too for tracker init ONLY 
     _, frame = cap.read()
+
     tracker = Tracker(frame)
 
     while True:
         # Reading, resizing, and flipping the frame
-        _, frame = cap.read()
-        frame = cv.resize(frame, (width, height))
-        frame = cv.flip(frame, 1)
+        ret , frame = cap.read()
 
-        # Processing the frame
-        fg_mask = bg_buffer.apply(frame)
+        if ret == True:
+            # frame = cv.resize(frame, (width, height))
+            # frame = cv.flip(frame, 1)
 
-        # Process contours
-        external_contour, internal_contours = contour_extractor.apply(frame)
+            # Processing the frame
+            # fg_mask = bg_buffer.apply(frame)
 
-        #cv.imshow("External contours", external_contour)
-        #cv.imshow("Internal contours", internal_contours)
+            # Process contours
+            # external_contour, internal_contours = contour_extractor.apply(frame)
 
-        # Match the set cursor in the frame with different methods
-        # bf_matches = matcher.brute_force_orb_match(frame)
-        # cv.imshow("BF ORB Matches", bf_matches)
+            #cv.imshow("External contours", external_contour)
+            #cv.imshow("Internal contours", internal_contours)
 
-        #sift_matches = matcher.brute_force_sift_match(frame)
-        #cv.imshow("BF SIFT Matches", sift_matches)
-        
-        #flann_matches = matcher.flann_match(frame)
-        # cv.imshow("FLANN Matches", flann_matches)
+            # Match the set cursor in the frame with different methods
+            # bf_matches = matcher.brute_force_orb_match(frame)
+            # cv.imshow("BF ORB Matches", bf_matches)
 
-        #detector.detect(frame)
-        #cv.imshow("FG Mask", fg_mask)
+            #sift_matches = matcher.brute_force_sift_match(frame)
+            #cv.imshow("BF SIFT Matches", sift_matches)
+            
+            #flann_matches = matcher.flann_match(frame)
+            # cv.imshow("FLANN Matches", flann_matches)
 
-        #img = tracker.lucas_kanade_track(frame)
-        #cv.imshow("Lucas-Kanade tracker", img)
-        img = tracker.gunner_farneback_track(frame)
-        cv.imshow("Gunner-Farneback tracker", img)
-        cv.imshow("Headmouse", frame)
+            #detector.detect(frame)
+            #cv.imshow("FG Mask", fg_mask)
 
-        key = cv.waitKey(1)
-        if  key == ord('q'):
-            cap.release()
+            #img = tracker.lucas_kanade_track(frame)
+            #cv.imshow("Lucas-Kanade tracker", img)
+            #img = tracker.gunner_farneback_track(frame)
+            #cv.imshow("Gunner-Farneback tracker", img)
+
+            img = tracker.cam_shift_track(frame)
+            cv.imshow("Face tracker", img)
+            cv.imshow("Headmouse", frame)
+
+            key = cv.waitKey(1)
+            if  key == ord('q'):
+                cap.release()
+                break
+            elif key == ord('s'): # Same image of desired cursor (ex. something simple)
+                cv.imwrite(filename='cursor.jpg', img=frame)
+                img_new = cv.imread('cursor.jpg', cv.IMREAD_GRAYSCALE)
+                img_new = cv.imshow("Captured Image", img_new)
+        else:
             break
-        elif key == ord('s'): # Same image of desired cursor (ex. something simple)
-            cv.imwrite(filename='cursor.jpg', img=frame)
-            img_new = cv.imread('cursor.jpg', cv.IMREAD_GRAYSCALE)
-            img_new = cv.imshow("Captured Image", img_new)
-
 
 if __name__ == '__main__':
     main()
