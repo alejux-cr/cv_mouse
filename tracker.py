@@ -1,18 +1,21 @@
 import cv2 as cv
 import numpy as np
+import pdb
 
 class Tracker:
-    def __init__(self, prev_frame):
+    def __init__(self, frame):
         # params for pyramid Lucas-Kanade method
         self.corner_track_params = dict(maxCorners = 10, qualityLevel= 0.4, minDistance = 1, blockSize = 7)
         # max level pyramid size, the more levels, the smaller the resolution
         # criteria param adjust
         self.lk_params = dict(winSize = (200, 200), maxLevel = 2, criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
-        self.prev_gray_frame = cv.cvtColor(prev_frame, cv.COLOR_BGR2GRAY)
+        self.prev_gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         # Points to track
         self.prev_points = cv.goodFeaturesToTrack(self.prev_gray_frame, mask=None, **self.corner_track_params)
-        self.hsv_mask = np.zeros_like(prev_frame)
+        self.hsv_mask = np.zeros_like(frame)
         self.hsv_mask[:,:,1] = 255 # fully saturated
+
+        self.face_cascade = cv.CascadeClassifier('haarcascades/haarcascade_frontalface_default.xml')
 
     def lucas_kanade_track(self, frame):
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -46,3 +49,46 @@ class Tracker:
         self.prev_gray_frame = frame_gray.copy()
         return bgr
 
+    def cam_shift_track(self, frame):
+        face_rects = self.face_cascade.detectMultiScale(frame)
+
+        if len(face_rects) > 0:
+
+            (face_x, face_y, w, h) = tuple(face_rects[0])
+            track_window = (face_x, face_y, w, h)
+
+            roi = frame[face_y:face_y+h, face_x:face_x+w]
+
+            hsv_roi = cv.cvtColor(roi, cv.COLOR_BGR2HSV)
+
+            roi_hist = cv.calcHist([hsv_roi], [0], None, [180], [0, 180])
+
+            cv.normalize(roi_hist, roi_hist, 0, 255, cv.NORM_MINMAX)
+
+            term_criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 1)
+            
+            hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+
+            dst = cv.calcBackProject([hsv], [0], roi_hist, [0, 180], 1)
+
+            # using MeanShift
+            #ret, track_window = cv.meanShift(dst, track_window, term_criteria)
+
+            #x, y, w, h = track_window
+
+            #img2 = cv.rectangle(frame, (x, y), (x+w, y+h), (0,0,255),5)
+            #####
+
+            # using CamShift to improve rectangle size
+
+            ret, track_window = cv.CamShift(dst, track_window, term_criteria)
+
+            pts = cv.boxPoints(ret)
+            pts = np.int0(pts)
+            img2 = cv.polylines(frame, [pts], True, (0,0,255), 5)
+        else:
+            img2 = frame
+
+        return img2
+
+        
